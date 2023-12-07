@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Api(tags = "Commodity")
 @RequestMapping("commodity")
@@ -61,7 +62,7 @@ public class CommodityController {
     @GetMapping("/delete-commodity")
     public ResponseResult deleteCommodity(@RequestParam Integer commodityId){
         boolean res =  commodityService.removeById(commodityId);
-        return ResponseResult.e(ResponseCode.OK);
+        return res ? ResponseResult.e(ResponseCode.OK) : ResponseResult.e(ResponseCode.FAIL);
     }
 
     @ApiOperation("购买商品")
@@ -75,6 +76,7 @@ public class CommodityController {
         }
         BigDecimal sumPrice = BigDecimal.valueOf(commodity.getValue() * purchaseReq.getCommodityNum());
         deal.setSumPrice(sumPrice.doubleValue());
+        deal.setCreateTime(new Date());
         boolean res =  dealService.save(deal);
         if (res) {
             return bankAccountService.purchase(purchaseReq.getBankAccountId(), sumPrice) ? ResponseResult.e(ResponseCode.OK, deal) : ResponseResult.e(ResponseCode.FAIL);
