@@ -1,5 +1,8 @@
 package com.example.walletpayment.controller;
 
+import com.example.walletpayment.config.ResponseCode;
+import com.example.walletpayment.config.ResponseResult;
+import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +22,12 @@ public class UserController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private UserService userService;
+
     @ApiOperation("获取所有用户")
-    @GetMapping("/get-users")
-    public List<Map<String, Object>> getUserList(){
-        //查询sql语句
-        String sql = "select * from user";
-        List<Map<String, Object>> list =  jdbcTemplate.queryForList(sql);
-        //返回结果
-        return list;
+    @GetMapping("/list")
+    public ResponseResult list(){
+        return ResponseResult.e(ResponseCode.OK, userService.list());
     }
 }
