@@ -20,4 +20,6 @@ public class Order {
     private Integer commodityNum;
 
     private Integer commodityId;
+
+    private Integer bankAccountId;
 }

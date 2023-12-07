@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "BankAccount")
+@RequestMapping("/bankAccount")
 @RestController
 @Slf4j
 public class BankAccountController {

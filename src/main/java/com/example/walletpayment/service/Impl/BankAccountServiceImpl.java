@@ -7,6 +7,7 @@ import com.example.walletpayment.mybatis.mapper.BankAccountMapper;
 import com.example.walletpayment.service.BankAccountService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,5 +17,15 @@ public class BankAccountServiceImpl extends ServiceImpl<BankAccountMapper, BankA
         QueryWrapper<BankAccount> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(BankAccount::getUserId, userId);
         return this.list(wrapper);
+    }
+
+    @Override
+    public Boolean purchase(Integer accountId, BigDecimal sumPrice) {
+        QueryWrapper<BankAccount> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(BankAccount::getAccountId, accountId);
+        BankAccount bankAccount = this.getOne(wrapper);
+        BigDecimal balance = BigDecimal.valueOf(bankAccount.getBalance());
+        bankAccount.setBalance(balance.subtract(sumPrice).doubleValue());
+        return this.updateById(bankAccount);
     }
 }

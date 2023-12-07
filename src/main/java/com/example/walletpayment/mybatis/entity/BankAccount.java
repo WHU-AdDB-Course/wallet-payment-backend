@@ -13,7 +13,7 @@ public class BankAccount {
 
     private String bankName;
 
-    private Integer balance;
+    private Double balance;
 
     private String accountType;
 
