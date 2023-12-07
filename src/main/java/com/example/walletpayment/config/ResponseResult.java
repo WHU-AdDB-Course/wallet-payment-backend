@@ -40,4 +40,8 @@ public class ResponseResult<T> {
         res.setData(data);
         return res;
     }
+
+    public static synchronized <T> ResponseResult<T> e(ResponseCode statusEnum) {
+        return e(statusEnum, null);
+    }
 }
