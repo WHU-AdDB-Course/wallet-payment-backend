@@ -4,10 +4,10 @@ import com.example.walletpayment.common.PurchaseReq;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
 import com.example.walletpayment.mybatis.entity.Commodity;
-import com.example.walletpayment.mybatis.entity.Order;
+import com.example.walletpayment.mybatis.entity.Deal;
 import com.example.walletpayment.service.BankAccountService;
 import com.example.walletpayment.service.CommodityService;
-import com.example.walletpayment.service.OrderService;
+import com.example.walletpayment.service.DealService;
 import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,7 +33,7 @@ public class CommodityController {
     private BankAccountService bankAccountService;
 
     @Autowired
-    private OrderService orderService;
+    private DealService dealService;
 
     @ApiOperation("获取单个商品")
     @GetMapping("/get-commodity")
@@ -67,17 +67,17 @@ public class CommodityController {
     @ApiOperation("购买商品")
     @PostMapping("/purchase")
     public ResponseResult purchase(@RequestBody PurchaseReq purchaseReq){
-        Order order = new Order();
+        Deal deal = new Deal();
         Commodity commodity = commodityService.getById(purchaseReq.getCommodityId());
-        BeanUtils.copyProperties(purchaseReq, order);
+        BeanUtils.copyProperties(purchaseReq, deal);
         if (commodity == null) {
             return ResponseResult.error("商品id不存在");
         }
         BigDecimal sumPrice = BigDecimal.valueOf(commodity.getValue() * purchaseReq.getCommodityNum());
-        order.setSumPrice(sumPrice.doubleValue());
-        boolean res =  orderService.save(order);
+        deal.setSumPrice(sumPrice.doubleValue());
+        boolean res =  dealService.save(deal);
         if (res) {
-            return bankAccountService.purchase(purchaseReq.getBankAccountId(), sumPrice) ? ResponseResult.e(ResponseCode.OK, order) : ResponseResult.e(ResponseCode.FAIL);
+            return bankAccountService.purchase(purchaseReq.getBankAccountId(), sumPrice) ? ResponseResult.e(ResponseCode.OK, deal) : ResponseResult.e(ResponseCode.FAIL);
         }
         return ResponseResult.error("订单保存失败");
     }
