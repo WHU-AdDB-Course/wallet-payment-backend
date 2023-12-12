@@ -1,6 +1,6 @@
 package com.example.walletpayment.controller;
 
-import com.example.walletpayment.common.PurchaseReq;
+import com.example.walletpayment.common.req.PurchaseReq;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
 import com.example.walletpayment.mybatis.entity.Commodity;

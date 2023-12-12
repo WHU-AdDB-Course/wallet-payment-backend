@@ -1,17 +1,19 @@
 package com.example.walletpayment.controller;
 
+import com.example.walletpayment.common.req.UserLoginReq;
+import com.example.walletpayment.common.vo.UserVO;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
 import com.example.walletpayment.mybatis.entity.User;
 import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 
 @Api(tags = "User")
@@ -22,10 +24,20 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public UserVO assembleVO(User user) {
+        UserVO vo = new UserVO();
+        BeanUtils.copyProperties(user, vo);
+        List<String> email = List.of(user.getEmail().split(","));
+        vo.setEmail(email);
+        return vo;
+    }
+
     @ApiOperation("用户登录")
     @PostMapping ("/login")
-    public ResponseResult login(@RequestParam String phone, @RequestParam String password){
-        User user = userService.getById(phone);
+    public ResponseResult login(@RequestBody UserLoginReq req){
+        String phone = req.getPhone();
+        String password = req.getPassword();
+        User user = userService.getByPhone(phone);
         if (user == null) {
             return ResponseResult.error("用户手机号不存在");
         }
@@ -38,13 +50,17 @@ public class UserController {
     @ApiOperation("获取单个用户")
     @GetMapping("/get")
     public ResponseResult get(@RequestParam Integer id){
-        return ResponseResult.e(ResponseCode.OK, userService.getById(id));
+        return ResponseResult.e(ResponseCode.OK, assembleVO(userService.getById(id)));
     }
 
     @ApiOperation("获取所有用户")
     @GetMapping("/list")
     public ResponseResult list(){
-        return ResponseResult.e(ResponseCode.OK, userService.list());
+        List<UserVO> res = new ArrayList<>();
+        userService.list().forEach(user -> {
+            res.add(assembleVO(user));
+        });
+        return ResponseResult.e(ResponseCode.OK, res);
     }
 
     @ApiOperation("新增用户")

@@ -16,7 +16,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(User::getPhone, phone);
         List<User> list = this.list(wrapper);
-        return list == null ? null : list.get(0);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

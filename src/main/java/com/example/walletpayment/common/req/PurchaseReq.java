@@ -1,4 +1,4 @@
-package com.example.walletpayment.common;
+package com.example.walletpayment.common.req;
 
 import lombok.Data;
 
