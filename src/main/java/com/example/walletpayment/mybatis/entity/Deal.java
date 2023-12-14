@@ -26,6 +26,8 @@ public class Deal {
 
     private Integer commodityId;
 
+    private String commodityName;
+
     private Integer bankAccountId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

@@ -18,7 +18,7 @@ public class Commodity {
     private Integer commodityId;
 
     @NotBlank(message = "商品名称不能为空")
-    private String name;
+    private String commodityName;
 
     @NotNull(message = "商品价值不能为空")
     private Double value;
