@@ -26,13 +26,13 @@ public class SendRecordController {
     }
 
     @ApiOperation("查询转钱记录（转出）")
-    @GetMapping("/list")
+    @GetMapping("/listOut")
     public ResponseResult listSendRecordOut(@RequestParam Integer senderId){
         return ResponseResult.e(ResponseCode.OK, sendRecordService.ListSendRecordOut(senderId));
     }
 
     @ApiOperation("查询转钱记录（转入）")
-    @GetMapping("/list")
+    @GetMapping("/listIn")
     public ResponseResult listSendRecordIn(@RequestParam Integer targeterId){
         return ResponseResult.e(ResponseCode.OK, sendRecordService.ListSendRecordIn(targeterId));
     }

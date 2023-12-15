@@ -64,7 +64,6 @@ public class SendRecordServiceImpl extends ServiceImpl<SendRecordMapper, SendRec
 
         wrapper.lambda().eq(SendRecord::getTargeterId, targeterId);
         List<SendRecord> sendRecords = this.list(wrapper);
-        sendRecords = sendRecords.stream().filter(s -> s.getStatus()==0).collect(Collectors.toList());
         return sendRecords;
     }
 }
