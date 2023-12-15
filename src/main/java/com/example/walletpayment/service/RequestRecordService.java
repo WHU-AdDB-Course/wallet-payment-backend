@@ -13,4 +13,6 @@ public interface RequestRecordService extends IService<RequestRecord> {
 
     List<RequestRecord> ListRequestRecordIn(Integer targeterId);
 
+    Boolean verifyRequestRecord(RequestRecord requestRecord);
+
 }

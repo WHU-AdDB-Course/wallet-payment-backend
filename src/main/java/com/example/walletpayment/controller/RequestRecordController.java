@@ -23,7 +23,7 @@ public class RequestRecordController {
 
     @PostMapping("/add")
     @ApiOperation("增加收钱任务")
-    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, List<String> phoneAndEmails){
+    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, @RequestParam("phoneAndEmails") List<String> phoneAndEmails){
         return ResponseResult.e(ResponseCode.OK, requestRecordService.RequestMoney(requestRecord, phoneAndEmails));
     }
 
@@ -38,4 +38,11 @@ public class RequestRecordController {
     public ResponseResult listRequestRecordIn(@RequestParam Integer targeterId){
         return ResponseResult.e(ResponseCode.OK, requestRecordService.ListRequestRecordIn(targeterId));
     }
+
+    @PostMapping("/verify")
+    @ApiOperation("确认付钱")
+    public ResponseResult verifyRequestRecord(@RequestBody RequestRecord requestRecord){
+        return ResponseResult.e(ResponseCode.OK, requestRecordService.verifyRequestRecord(requestRecord));
+    }
+
 }
