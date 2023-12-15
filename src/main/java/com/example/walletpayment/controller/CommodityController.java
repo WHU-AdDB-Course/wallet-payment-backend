@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Api(tags = "Commodity")
-@RequestMapping("commodity")
+@RequestMapping("/commodity")
 @RestController
 @Slf4j
 public class CommodityController {
