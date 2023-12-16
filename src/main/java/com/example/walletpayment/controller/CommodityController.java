@@ -77,6 +77,7 @@ public class CommodityController {
         BigDecimal sumPrice = BigDecimal.valueOf(commodity.getValue() * purchaseReq.getCommodityNum());
         deal.setSumPrice(sumPrice.doubleValue());
         deal.setCreateTime(new Date());
+        deal.setCommodityName(commodity.getCommodityName());
         boolean res =  dealService.save(deal);
         if (res) {
             return bankAccountService.purchase(purchaseReq.getBankAccountId(), sumPrice) ? ResponseResult.e(ResponseCode.OK, deal) : ResponseResult.e(ResponseCode.FAIL);
