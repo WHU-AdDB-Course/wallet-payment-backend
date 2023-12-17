@@ -6,4 +6,6 @@ import com.example.walletpayment.mybatis.entity.User;
 public interface UserService extends IService<User> {
     User getByPhone(String phone);
     User getBySsn(String ssn);
+    User getByPhoneOrEmail(String phone, String email);
+    User getByPhoneAndEmail(String phone, String email);
 }

@@ -20,7 +20,7 @@ public class RequestRecord {
 
     private Integer targeterId;
 
-    private Integer value;
+    private Double value;
 
     private Integer status;
 
@@ -29,4 +29,8 @@ public class RequestRecord {
     private Date createTime;
 
     private Date finishTime;
+
+    private Integer requestBankId;
+
+    private Integer targetBankId;
 }

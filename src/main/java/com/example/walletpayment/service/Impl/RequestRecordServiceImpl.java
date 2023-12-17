@@ -27,24 +27,22 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     private UserService userService;
 
     @Override
-    public Boolean RequestMoney(RequestRecord requestRecord, List<String> phoneAndEmails) {
-        phoneAndEmails.stream().forEach(s -> {
-            QueryWrapper<User> wrapper = new QueryWrapper<>();
-            String phone = s.split("-")[0];
-            String email = s.split("-")[1];
-            wrapper.lambda().eq(User::getPhone, phone);
-            wrapper.lambda().like(User::getEmail, email);
-            User target = userService.list(wrapper).get(0);
+    public Boolean RequestMoney(RequestRecord requestRecord, Integer requestBank, List<Integer> targetBanks) {
+        targetBanks.stream().forEach(s -> {
+
+            Integer targetId = bankAccountService.getById(s).getUserId();
 
             RequestRecord requestRecord1 = new RequestRecord();
 
             requestRecord1.setRequesterId(requestRecord.getRequesterId());
-            requestRecord1.setTargeterId(target.getUserId());
+            requestRecord1.setTargeterId(targetId);
             requestRecord1.setRemark(requestRecord.getRemark());
             requestRecord1.setValue(requestRecord.getValue());
             requestRecord1.setCreateTime(new Date());
             requestRecord1.setStatus(0);
             requestRecord1.setFinishTime(requestRecord.getFinishTime());
+            requestRecord1.setRequestBankId(requestBank);
+            requestRecord1.setTargetBankId(s);
 
             this.save(requestRecord1);
         });
@@ -72,16 +70,21 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     @Override
     public Boolean verifyRequestRecord(RequestRecord requestRecord) {
         QueryWrapper<BankAccount> BAwrapper1 = new QueryWrapper<>();
-        BAwrapper1.lambda().eq(BankAccount::getUserId, requestRecord.getTargeterId());
-        BankAccount bankAccount1 = bankAccountService.list(BAwrapper1).get(0);
-        bankAccount1.setBalance(bankAccount1.getBalance()-requestRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount1);
+        BAwrapper1.lambda().eq(BankAccount::getAccountId, requestRecord.getTargeterId());
+        BankAccount targetBank = bankAccountService.list(BAwrapper1).get(0);
+
+        if (targetBank.getBalance() < requestRecord.getValue()){
+            return Boolean.FALSE;
+        }
+
+        targetBank.setBalance(targetBank.getBalance()-requestRecord.getValue());
+        bankAccountService.saveOrUpdate(targetBank);
 
         QueryWrapper<BankAccount> BAwrapper2 = new QueryWrapper<>();
-        BAwrapper2.lambda().eq(BankAccount::getUserId, requestRecord.getRequesterId());
-        BankAccount bankAccount2 = bankAccountService.list(BAwrapper2).get(0);
-        bankAccount2.setBalance(bankAccount2.getBalance()+requestRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount2);
+        BAwrapper2.lambda().eq(BankAccount::getAccountId, requestRecord.getRequesterId());
+        BankAccount requestBank = bankAccountService.list(BAwrapper2).get(0);
+        requestBank.setBalance(requestBank.getBalance()+requestRecord.getValue());
+        bankAccountService.saveOrUpdate(requestBank);
 
         requestRecord.setStatus(1);
 

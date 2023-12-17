@@ -27,4 +27,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return list == null ? null : list.get(0);
     }
 
+    /* 转钱功能需求 */
+    @Override
+    public User getByPhoneOrEmail(String phone, String email) {
+        User target = new User();
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        if (phone != null && !phone.equals("")) {
+            wrapper.lambda().eq(User::getPhone, phone);
+            target = this.list(wrapper).get(0);
+        } else {
+            wrapper.lambda().like(User::getEmail, email);
+            target = this.list(wrapper).get(0);
+        }
+        return target;
+    }
+
+    /* 收钱功能需求 */
+    @Override
+    public User getByPhoneAndEmail(String phone, String email) {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(User::getPhone, phone);
+        wrapper.lambda().like(User::getEmail, email);
+        User target = this.list(wrapper).get(0);
+        return target;
+    }
+
+
 }

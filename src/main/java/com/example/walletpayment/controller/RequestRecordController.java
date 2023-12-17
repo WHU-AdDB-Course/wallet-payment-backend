@@ -6,6 +6,7 @@ import com.example.walletpayment.mybatis.entity.RequestRecord;
 import com.example.walletpayment.service.RequestRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,8 @@ public class RequestRecordController {
 
     @PostMapping("/add")
     @ApiOperation("增加收钱任务")
-    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, @RequestParam("phoneAndEmails") List<String> phoneAndEmails){
-        return ResponseResult.e(ResponseCode.OK, requestRecordService.RequestMoney(requestRecord, phoneAndEmails));
+    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, Integer requestBank, List<Integer> targetBanks){
+        return ResponseResult.e(ResponseCode.OK, requestRecordService.RequestMoney(requestRecord, requestBank, targetBanks));
     }
 
     @GetMapping("/listOut")
@@ -42,7 +43,12 @@ public class RequestRecordController {
     @PostMapping("/verify")
     @ApiOperation("确认付钱")
     public ResponseResult verifyRequestRecord(@RequestBody RequestRecord requestRecord){
-        return ResponseResult.e(ResponseCode.OK, requestRecordService.verifyRequestRecord(requestRecord));
+        if (requestRecordService.verifyRequestRecord(requestRecord)){
+            return ResponseResult.e(ResponseCode.OK, Boolean.TRUE);
+        }
+        else {
+            return ResponseResult.error("余额不足以支付");
+        }
     }
 
 }

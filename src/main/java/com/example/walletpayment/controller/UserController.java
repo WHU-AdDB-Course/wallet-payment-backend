@@ -78,5 +78,23 @@ public class UserController {
         return ResponseResult.e(ResponseCode.OK, userService.updateById(user));
     }
 
+    @ApiOperation("根据邮箱或电话获取用户")
+    @GetMapping("/get-or")
+    public ResponseResult getOr(@RequestParam(required = false) String phone, @RequestParam(required = false) String email){
+        if (phone == null && email == null){
+            return ResponseResult.error("电话和邮箱不能都为空");
+        }
+        return ResponseResult.e(ResponseCode.OK, userService.getByPhoneOrEmail(phone, email));
+    }
+
+    @ApiOperation("根据邮箱和电话获取用户")
+    @GetMapping("/get-and")
+    public ResponseResult getAnd(@RequestParam(required = true) String phone, @RequestParam(required = true) String email){
+        if (phone == null || email == null){
+            return ResponseResult.error("电话和邮箱都不能都为空");
+        }
+        return ResponseResult.e(ResponseCode.OK, userService.getByPhoneAndEmail(phone, email));
+    }
+
 
 }

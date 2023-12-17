@@ -32,40 +32,29 @@ public class SendRecordServiceImpl extends ServiceImpl<SendRecordMapper, SendRec
     private UserService userService;
 
     @Override
-    public Boolean SendMoney(SendRecord sendRecord) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
-        if (sendRecord.getPhone() != null && !sendRecord.getPhone().equals("")) {
-            wrapper.lambda().eq(User::getPhone, sendRecord.getPhone());
-            User target = userService.list(wrapper).get(0);
-            sendRecord.setTargeterId(target.getUserId());
-            sendRecord.setEmail(target.getEmail());
-        } else {
-            wrapper.lambda().like(User::getEmail, sendRecord.getEmail());
-            User target = userService.list(wrapper).get(0);
-            sendRecord.setTargeterId(target.getUserId());
-            sendRecord.setPhone(target.getPhone());
-        }
+    public Boolean SendMoney(SendRecord sendRecord, Integer senderBank, Integer targetBank) {
+        User targetUser = userService.getById(sendRecord.getTargeterId());
+        sendRecord.setEmail(targetUser.getEmail());
+        sendRecord.setPhone(targetUser.getPhone());
         Date now = new Date();
         sendRecord.setCreateTime(now);
-//        sendRecord.setStatus(0);
-        try {
-            this.save(sendRecord);
-        } catch (Exception e){
+
+        BankAccount sender = bankAccountService.getById(senderBank);
+        BankAccount target = bankAccountService.getById(targetBank);
+
+        if (sender.getBalance()-sendRecord.getValue() < 0){
             return Boolean.FALSE;
         }
 
-        QueryWrapper<BankAccount> BAwrapper1 = new QueryWrapper<>();
-        BAwrapper1.lambda().eq(BankAccount::getUserId, sendRecord.getSenderId());
-        BankAccount bankAccount1 = bankAccountService.list(BAwrapper1).get(0);
-        bankAccount1.setBalance(bankAccount1.getBalance()-sendRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount1);
-
-        QueryWrapper<BankAccount> BAwrapper2 = new QueryWrapper<>();
-        BAwrapper2.lambda().eq(BankAccount::getUserId, sendRecord.getTargeterId());
-        BankAccount bankAccount2 = bankAccountService.list(BAwrapper2).get(0);
-        bankAccount2.setBalance(bankAccount2.getBalance()+sendRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount2);
-
+        sender.setBalance(sender.getBalance() - sendRecord.getValue());
+        target.setBalance(target.getBalance() + sendRecord.getValue());
+        try {
+            this.save(sendRecord);
+            bankAccountService.saveOrUpdate(sender);
+            bankAccountService.saveOrUpdate(target);
+        } catch (Exception e){
+            return Boolean.FALSE;
+        }
         return Boolean.TRUE;
     }
 
