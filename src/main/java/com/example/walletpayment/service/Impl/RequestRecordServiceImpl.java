@@ -70,7 +70,7 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     @Override
     public Boolean verifyRequestRecord(RequestRecord requestRecord) {
         QueryWrapper<BankAccount> BAwrapper1 = new QueryWrapper<>();
-        BAwrapper1.lambda().eq(BankAccount::getAccountId, requestRecord.getTargeterId());
+        BAwrapper1.lambda().eq(BankAccount::getAccountId, requestRecord.getTargetBankId());
         BankAccount targetBank = bankAccountService.list(BAwrapper1).get(0);
 
         if (targetBank.getBalance() < requestRecord.getValue()){
@@ -81,7 +81,7 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
         bankAccountService.saveOrUpdate(targetBank);
 
         QueryWrapper<BankAccount> BAwrapper2 = new QueryWrapper<>();
-        BAwrapper2.lambda().eq(BankAccount::getAccountId, requestRecord.getRequesterId());
+        BAwrapper2.lambda().eq(BankAccount::getAccountId, requestRecord.getRequestBankId());
         BankAccount requestBank = bankAccountService.list(BAwrapper2).get(0);
         requestBank.setBalance(requestBank.getBalance()+requestRecord.getValue());
         bankAccountService.saveOrUpdate(requestBank);
