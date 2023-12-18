@@ -1,10 +1,13 @@
 package com.example.walletpayment.controller;
 
+import com.example.walletpayment.common.req.SetDefaultAccountReq;
 import com.example.walletpayment.common.req.UserLoginReq;
 import com.example.walletpayment.common.vo.UserVO;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
+import com.example.walletpayment.mybatis.entity.BankAccount;
 import com.example.walletpayment.mybatis.entity.User;
+import com.example.walletpayment.service.BankAccountService;
 import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +27,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BankAccountService bankAccountService;
 
     public UserVO assembleVO(User user) {
         UserVO vo = new UserVO();
@@ -76,6 +83,20 @@ public class UserController {
     @PostMapping ("/update")
     public ResponseResult get(@RequestBody User user){
         return ResponseResult.e(ResponseCode.OK, userService.updateById(user));
+    }
+
+    @ApiOperation("设置默认银行账户")
+    @PostMapping("/setDefaultAccount")
+    public ResponseResult setDefaultAccount(@RequestBody @Valid SetDefaultAccountReq req) {
+        User user = userService.getById(req.getUserId());
+        BankAccount bankAccount = bankAccountService.getById(req.getBankAccountId());
+        try {
+            user.setDefaultAccountId(bankAccount.getAccountId());
+            userService.updateById(user);
+        } catch (Exception e) {
+            return ResponseResult.error("用户或银行账户不存在");
+        }
+        return ResponseResult.e(ResponseCode.OK);
     }
 
 

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.walletpayment.mybatis.entity.BankAccount;
 import com.example.walletpayment.mybatis.entity.RequestRecord;
-import com.example.walletpayment.mybatis.entity.SendRecord;
 import com.example.walletpayment.mybatis.entity.User;
 import com.example.walletpayment.mybatis.mapper.RequestRecordMapper;
 import com.example.walletpayment.service.BankAccountService;
@@ -13,7 +12,6 @@ import com.example.walletpayment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -71,15 +69,13 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
 
     @Override
     public Boolean verifyRequestRecord(RequestRecord requestRecord) {
-        QueryWrapper<BankAccount> BAwrapper1 = new QueryWrapper<>();
-        BAwrapper1.lambda().eq(BankAccount::getUserId, requestRecord.getTargeterId());
-        BankAccount bankAccount1 = bankAccountService.list(BAwrapper1).get(0);
+        User targeter = userService.getById(requestRecord.getTargeterId());
+        BankAccount bankAccount1 = bankAccountService.getById(targeter.getDefaultAccountId());
         bankAccount1.setBalance(bankAccount1.getBalance()-requestRecord.getValue());
         bankAccountService.saveOrUpdate(bankAccount1);
 
-        QueryWrapper<BankAccount> BAwrapper2 = new QueryWrapper<>();
-        BAwrapper2.lambda().eq(BankAccount::getUserId, requestRecord.getRequesterId());
-        BankAccount bankAccount2 = bankAccountService.list(BAwrapper2).get(0);
+        User requester = userService.getById(requestRecord.getRequesterId());
+        BankAccount bankAccount2 = bankAccountService.getById(requester.getDefaultAccountId());
         bankAccount2.setBalance(bankAccount2.getBalance()+requestRecord.getValue());
         bankAccountService.saveOrUpdate(bankAccount2);
 

@@ -3,24 +3,17 @@ package com.example.walletpayment.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.walletpayment.mybatis.entity.BankAccount;
-import com.example.walletpayment.mybatis.entity.ReUserBank;
 import com.example.walletpayment.mybatis.entity.SendRecord;
 import com.example.walletpayment.mybatis.entity.User;
 import com.example.walletpayment.mybatis.mapper.SendRecordMapper;
-import com.example.walletpayment.mybatis.mapper.UserMapper;
 import com.example.walletpayment.service.BankAccountService;
-import com.example.walletpayment.service.ReUserBankService;
 import com.example.walletpayment.service.SendRecordService;
 import com.example.walletpayment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SendRecordServiceImpl extends ServiceImpl<SendRecordMapper, SendRecord> implements SendRecordService {
@@ -54,15 +47,13 @@ public class SendRecordServiceImpl extends ServiceImpl<SendRecordMapper, SendRec
             return Boolean.FALSE;
         }
 
-        QueryWrapper<BankAccount> BAwrapper1 = new QueryWrapper<>();
-        BAwrapper1.lambda().eq(BankAccount::getUserId, sendRecord.getSenderId());
-        BankAccount bankAccount1 = bankAccountService.list(BAwrapper1).get(0);
+        User sender = userService.getById(sendRecord.getSenderId());
+        BankAccount bankAccount1 = bankAccountService.getById(sender.getDefaultAccountId());
         bankAccount1.setBalance(bankAccount1.getBalance()-sendRecord.getValue());
         bankAccountService.saveOrUpdate(bankAccount1);
 
-        QueryWrapper<BankAccount> BAwrapper2 = new QueryWrapper<>();
-        BAwrapper2.lambda().eq(BankAccount::getUserId, sendRecord.getTargeterId());
-        BankAccount bankAccount2 = bankAccountService.list(BAwrapper2).get(0);
+        User targeter = userService.getById(sendRecord.getTargeterId());
+        BankAccount bankAccount2 = bankAccountService.getById(targeter.getDefaultAccountId());
         bankAccount2.setBalance(bankAccount2.getBalance()+sendRecord.getValue());
         bankAccountService.saveOrUpdate(bankAccount2);
 

@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Data
 @TableName(value = "user")
@@ -27,4 +26,6 @@ public class User {
 
     @NotBlank(message = "密码不能为空")
     private String password;
+
+    private Integer defaultAccountId;
 }

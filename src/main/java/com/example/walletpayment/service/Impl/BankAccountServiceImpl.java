@@ -8,15 +8,22 @@ import com.example.walletpayment.service.BankAccountService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 public class BankAccountServiceImpl extends ServiceImpl<BankAccountMapper, BankAccount> implements BankAccountService {
+
     @Override
-    public List<BankAccount> listByUser(Integer userId) {
+    public BankAccount getByBankNumber(String bankNumber) {
         QueryWrapper<BankAccount> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(BankAccount::getUserId, userId);
-        return this.list(wrapper);
+        wrapper.lambda().eq(BankAccount::getBankNumber, bankNumber);
+        return this.list(wrapper).isEmpty() ? null : this.list(wrapper).get(0);
+    }
+
+    @Override
+    public Boolean checkBalance(Integer bankAccountId, Double price) {
+        BankAccount bankAccount = this.getById(bankAccountId);
+        if (bankAccount == null) return false;
+        return bankAccount.getBalance() >= price;
     }
 
     @Override
