@@ -25,9 +25,9 @@ public class RequestRecordController {
 
     @PostMapping("/add")
     @ApiOperation("增加收钱任务")
-    @ApiImplicitParam(name = "targetBanks", value = "targetBanks", allowMultiple = true, dataTypeClass = List.class, paramType = "query")
-    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, Integer requestBank, @RequestParam(value = "targetBanks") List<Integer> targetBanks){
-        return ResponseResult.e(ResponseCode.OK, requestRecordService.RequestMoney(requestRecord, requestBank, targetBanks));
+    @ApiImplicitParam(name = "phoneAndEmails", value = "phoneAndEmails", allowMultiple = true, dataTypeClass = List.class, paramType = "query")
+    public ResponseResult requestMoney(@RequestBody RequestRecord requestRecord, @RequestParam("phoneAndEmails") List<String> phoneAndEmails){
+        return ResponseResult.e(ResponseCode.OK, requestRecordService.RequestMoney(requestRecord, phoneAndEmails));
     }
 
     @GetMapping("/listOut")

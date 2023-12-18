@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.walletpayment.mybatis.entity.BankAccount;
 import com.example.walletpayment.mybatis.entity.RequestRecord;
+import com.example.walletpayment.mybatis.entity.SendRecord;
 import com.example.walletpayment.mybatis.entity.User;
 import com.example.walletpayment.mybatis.mapper.RequestRecordMapper;
 import com.example.walletpayment.service.BankAccountService;
@@ -12,6 +13,7 @@ import com.example.walletpayment.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     @Override
     public Boolean RequestMoney(RequestRecord requestRecord, List<String> phoneAndEmails) {
         phoneAndEmails.stream().forEach(s -> {
+
             QueryWrapper<User> wrapper = new QueryWrapper<>();
             String phone = s.split("-")[0];
             String email = s.split("-")[1];
@@ -45,6 +48,7 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
             requestRecord1.setFinishTime(requestRecord.getFinishTime());
 
             this.save(requestRecord1);
+
         });
         return Boolean.TRUE;
     }
@@ -70,14 +74,24 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     @Override
     public Boolean verifyRequestRecord(RequestRecord requestRecord) {
         User targeter = userService.getById(requestRecord.getTargeterId());
-        BankAccount bankAccount1 = bankAccountService.getById(targeter.getDefaultAccountId());
-        bankAccount1.setBalance(bankAccount1.getBalance()-requestRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount1);
+        QueryWrapper<BankAccount> targetWrapper = new QueryWrapper<>();
+        targetWrapper.lambda().eq(BankAccount::getAccountId, targeter.getDefaultAccountId());
+        BankAccount targetAccount = bankAccountService.list(targetWrapper).get(0);
+
+        if (targetAccount.getBalance() - requestRecord.getValue() < 0){
+            return Boolean.FALSE;
+        }
+
+        targetAccount.setBalance(targetAccount.getBalance()-requestRecord.getValue());
+        bankAccountService.saveOrUpdate(targetAccount);
+
 
         User requester = userService.getById(requestRecord.getRequesterId());
-        BankAccount bankAccount2 = bankAccountService.getById(requester.getDefaultAccountId());
-        bankAccount2.setBalance(bankAccount2.getBalance()+requestRecord.getValue());
-        bankAccountService.saveOrUpdate(bankAccount2);
+        QueryWrapper<BankAccount> requestWrapper = new QueryWrapper<>();
+        requestWrapper.lambda().eq(BankAccount::getAccountId, requester.getDefaultAccountId());
+        BankAccount requestAccount = bankAccountService.list(requestWrapper).get(0);
+        requestAccount.setBalance(requestAccount.getBalance()+requestRecord.getValue());
+        bankAccountService.saveOrUpdate(requestAccount);
 
         requestRecord.setStatus(1);
 

@@ -6,7 +6,7 @@ import com.example.walletpayment.mybatis.entity.SendRecord;
 import java.util.List;
 
 public interface SendRecordService extends IService<SendRecord> {
-    Boolean SendMoney(SendRecord sendRecord, Integer senderBank, Integer targerBank);
+    Boolean SendMoney(SendRecord sendRecord);
 
     List<SendRecord> ListSendRecordOut(Integer senderId);
 

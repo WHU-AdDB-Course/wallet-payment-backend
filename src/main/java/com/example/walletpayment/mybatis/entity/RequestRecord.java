@@ -29,8 +29,4 @@ public class RequestRecord {
     private Date createTime;
 
     private Date finishTime;
-
-    private Integer requestBankId;
-
-    private Integer targetBankId;
 }

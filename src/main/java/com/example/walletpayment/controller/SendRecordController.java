@@ -21,8 +21,8 @@ public class SendRecordController {
 
     @ApiOperation("增加新的转钱任务")
     @PostMapping("/add")
-    public ResponseResult sendMoney(@RequestBody SendRecord sendRecord, Integer senderBank, Integer targetBank){
-        if (sendRecordService.SendMoney(sendRecord, senderBank, targetBank)){
+    public ResponseResult sendMoney(@RequestBody SendRecord sendRecord){
+        if (sendRecordService.SendMoney(sendRecord)){
             return ResponseResult.e(ResponseCode.OK, Boolean.TRUE);
         }
         else {
