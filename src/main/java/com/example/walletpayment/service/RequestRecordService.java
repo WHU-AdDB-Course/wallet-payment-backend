@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface RequestRecordService extends IService<RequestRecord> {
 
-    Boolean RequestMoney(RequestRecord requestRecord, List<String> phoneAndEmails);
+    Boolean RequestMoney(RequestRecord requestRecord, Integer requestBank, List<Integer> targetBanks);
 
     List<RequestRecord> ListRequestRecordOut(Integer requestId);
 

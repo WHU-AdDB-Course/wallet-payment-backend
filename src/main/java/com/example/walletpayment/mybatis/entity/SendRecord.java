@@ -20,7 +20,7 @@ public class SendRecord {
 
     private Integer targeterId;
 
-    private Integer value;
+    private Double value;
 
     private Integer status;
 

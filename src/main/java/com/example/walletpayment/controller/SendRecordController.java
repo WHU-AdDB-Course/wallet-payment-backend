@@ -21,8 +21,13 @@ public class SendRecordController {
 
     @ApiOperation("增加新的转钱任务")
     @PostMapping("/add")
-    public ResponseResult sendMoney(@RequestBody SendRecord sendRecord){
-        return ResponseResult.e(ResponseCode.OK, sendRecordService.SendMoney(sendRecord));
+    public ResponseResult sendMoney(@RequestBody SendRecord sendRecord, Integer senderBank, Integer targetBank){
+        if (sendRecordService.SendMoney(sendRecord, senderBank, targetBank)){
+            return ResponseResult.e(ResponseCode.OK, Boolean.TRUE);
+        }
+        else {
+            return ResponseResult.error("账户余额不足或存在其他错误");
+        }
     }
 
     @ApiOperation("查询转钱记录（转出）")
