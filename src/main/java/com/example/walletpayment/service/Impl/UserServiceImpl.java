@@ -24,7 +24,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.lambda().eq(User::getSsn, ssn);
         List<User> list = this.list(wrapper);
-        return list == null ? null : list.get(0);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public User getByEmail(String email) {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.lambda().like(User::getEmail, email);
+        List<User> list = this.list(wrapper);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     /* 转钱功能需求 */

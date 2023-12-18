@@ -1,13 +1,20 @@
 package com.example.walletpayment.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.walletpayment.common.req.AdvancedQueryReq;
 import com.example.walletpayment.common.req.SetDefaultAccountReq;
 import com.example.walletpayment.common.req.UserLoginReq;
+import com.example.walletpayment.common.vo.AdvancedQueryVO;
 import com.example.walletpayment.common.vo.UserVO;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
 import com.example.walletpayment.mybatis.entity.BankAccount;
+import com.example.walletpayment.mybatis.entity.RequestRecord;
+import com.example.walletpayment.mybatis.entity.SendRecord;
 import com.example.walletpayment.mybatis.entity.User;
 import com.example.walletpayment.service.BankAccountService;
+import com.example.walletpayment.service.RequestRecordService;
+import com.example.walletpayment.service.SendRecordService;
 import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +25,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Api(tags = "User")
@@ -30,6 +40,13 @@ public class UserController {
 
     @Autowired
     private BankAccountService bankAccountService;
+
+    @Autowired
+    private SendRecordService sendRecordService;
+
+    @Autowired
+    private RequestRecordService requestRecordService;
+
 
     public UserVO assembleVO(User user) {
         UserVO vo = new UserVO();
@@ -99,5 +116,141 @@ public class UserController {
         return ResponseResult.e(ResponseCode.OK);
     }
 
+    @ApiOperation("获取高级查找字段")
+    @GetMapping("getAdvancedQueryFields")
+    public ResponseResult getAdvancedQueryFields() {
+        List<String> fields = Stream.of("SSN", "邮箱", "手机号", "交易类型").collect(Collectors.toList());
+        return ResponseResult.e(ResponseCode.OK, fields);
+    }
+
+    private List<AdvancedQueryVO> getAdvancedQueryVOList(Integer searcherId, User user) {
+        if (user == null) {
+            return new ArrayList<>();
+        }
+        List<AdvancedQueryVO> res = new ArrayList<>();
+        QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+        sendRecordQueryWrapper.lambda()
+                .eq(SendRecord::getSenderId, searcherId)
+                .eq(SendRecord::getTargeterId, user.getUserId())
+                .or()
+                .eq(SendRecord::getSenderId, user.getUserId())
+                .eq(SendRecord::getTargeterId, searcherId);
+        List<SendRecord> sendRecordList = sendRecordService.list(sendRecordQueryWrapper);
+        for (SendRecord sendRecord : sendRecordList) {
+            res.add(new AdvancedQueryVO(userService, sendRecord));
+        }
+        QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+        requestRecordQueryWrapper.lambda()
+                .eq(RequestRecord::getStatus, 1)
+                .eq(RequestRecord::getRequesterId, searcherId)
+                .eq(RequestRecord::getTargeterId, user.getUserId())
+                .or()
+                .eq(RequestRecord::getStatus, 1)
+                .eq(RequestRecord::getRequesterId, user.getUserId())
+                .eq(RequestRecord::getTargeterId, searcherId);
+        List<RequestRecord> requestRecordList = requestRecordService.list(requestRecordQueryWrapper);
+        for (RequestRecord requestRecord : requestRecordList) {
+            res.add(new AdvancedQueryVO(userService, requestRecord));
+        }
+        return res;
+    }
+
+    private List<AdvancedQueryVO> getAdvancedQueryVOList(Integer searcherId, String type) {
+        List<AdvancedQueryVO> res = new ArrayList<>();
+        if (type.equals("支出")) {
+            QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+            sendRecordQueryWrapper.lambda()
+                    .eq(SendRecord::getTargeterId, searcherId);
+            List<SendRecord> sendRecordList = sendRecordService.list(sendRecordQueryWrapper);
+            for (SendRecord sendRecord : sendRecordList) {
+                res.add(new AdvancedQueryVO(userService, sendRecord));
+            }
+            QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+            requestRecordQueryWrapper.lambda()
+                    .eq(RequestRecord::getStatus, 1)
+                    .eq(RequestRecord::getTargeterId, searcherId);
+            List<RequestRecord> requestRecordList = requestRecordService.list(requestRecordQueryWrapper);
+            for (RequestRecord requestRecord : requestRecordList) {
+                res.add(new AdvancedQueryVO(userService, requestRecord));
+            }
+        }
+        else if (type.equals("收入")) {
+            QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+            sendRecordQueryWrapper.lambda()
+                    .eq(SendRecord::getSendRecordId, searcherId);
+            List<SendRecord> sendRecordList = sendRecordService.list(sendRecordQueryWrapper);
+            for (SendRecord sendRecord : sendRecordList) {
+                res.add(new AdvancedQueryVO(userService, sendRecord));
+            }
+            QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+            requestRecordQueryWrapper.lambda()
+                    .eq(RequestRecord::getStatus, 1)
+                    .eq(RequestRecord::getRequestRecordId, searcherId);
+            List<RequestRecord> requestRecordList = requestRecordService.list(requestRecordQueryWrapper);
+            for (RequestRecord requestRecord : requestRecordList) {
+                res.add(new AdvancedQueryVO(userService, requestRecord));
+            }
+        }
+        else {
+            return new ArrayList<>();
+        }
+        return res;
+    }
+
+    @ApiOperation("高级查找")
+    @PostMapping("advancedQuery")
+    public ResponseResult advancedQuery(@RequestBody @Valid AdvancedQueryReq req) {
+        String field = req.getField();
+        String value = req.getValue();
+        List<AdvancedQueryVO> advancedQueryVOList = new ArrayList<>();
+        switch (field) {
+            case "SSN": {
+                User user = userService.getBySsn(value);
+                if (Objects.equals(req.getUserId(), user.getUserId())) {
+                    return ResponseResult.error("信息与查询人重复！");
+                }
+                advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), user);
+                break;
+            }
+
+            case "邮箱": {
+                User user = userService.getByEmail(value);
+                if (Objects.equals(req.getUserId(), user.getUserId())) {
+                    return ResponseResult.error("信息与查询人重复！");
+                }
+                if (user != null) {
+                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), user);
+                }
+                break;
+            }
+
+            case "手机号": {
+                User user = userService.getByPhone(value);
+                if (Objects.equals(req.getUserId(), user.getUserId())) {
+                    return ResponseResult.error("信息与查询人重复！");
+                }
+                if (user != null) {
+                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), user);
+                }
+                break;
+            }
+
+            case "交易类型": {
+                if (value.equals("支出")) {
+                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), value);
+                }
+                else {
+                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), value);
+                }
+                break;
+            }
+
+            default: {
+                return ResponseResult.error("高级查找字段不存在");
+            }
+        }
+
+        return ResponseResult.e(ResponseCode.OK, advancedQueryVOList);
+    }
 
 }
