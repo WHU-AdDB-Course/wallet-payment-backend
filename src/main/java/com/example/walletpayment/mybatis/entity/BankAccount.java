@@ -14,7 +14,7 @@ public class BankAccount {
     private Integer accountId;
 
     @NotBlank
-    private String bankNumber;
+    private String accountNumber;
 
     private String bankName;
 

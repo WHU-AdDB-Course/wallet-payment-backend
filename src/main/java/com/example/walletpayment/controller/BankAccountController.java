@@ -60,7 +60,7 @@ public class BankAccountController {
 
             ReUserBank reUserBank = new ReUserBank();
             reUserBank.setUserId(req.getUserId());
-            reUserBank.setBankAccountId(bankAccountService.getByBankNumber(bankAccount.getBankNumber()).getAccountId());
+            reUserBank.setBankAccountId(bankAccountService.getByBankNumber(bankAccount.getAccountNumber()).getAccountId());
             res &= reUserBankService.saveOrUpdate(reUserBank);
             return res ? ResponseResult.e(ResponseCode.OK, bankAccount) : ResponseResult.e(ResponseCode.FAIL);
         }

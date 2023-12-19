@@ -15,7 +15,7 @@ public class BankAccountServiceImpl extends ServiceImpl<BankAccountMapper, BankA
     @Override
     public BankAccount getByBankNumber(String bankNumber) {
         QueryWrapper<BankAccount> wrapper = new QueryWrapper<>();
-        wrapper.lambda().eq(BankAccount::getBankNumber, bankNumber);
+        wrapper.lambda().eq(BankAccount::getAccountNumber, bankNumber);
         return this.list(wrapper).isEmpty() ? null : this.list(wrapper).get(0);
     }
 
