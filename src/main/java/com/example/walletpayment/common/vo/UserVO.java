@@ -26,4 +26,5 @@ public class UserVO {
     private String ssn;
     private String phone;
     private String password;
+    private Integer defaultAccountId;
 }
