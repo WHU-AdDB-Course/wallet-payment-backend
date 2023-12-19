@@ -11,6 +11,7 @@ import com.example.walletpayment.service.UserService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ import java.util.Date;
  **/
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class AdvancedQueryVO {
 
     private String senderName;
