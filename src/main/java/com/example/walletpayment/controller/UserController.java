@@ -18,14 +18,18 @@ import com.example.walletpayment.service.SendRecordService;
 import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
+import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -117,7 +121,7 @@ public class UserController {
     }
 
     @ApiOperation("获取高级查找字段")
-    @GetMapping("getAdvancedQueryFields")
+    @GetMapping("/getAdvancedQueryFields")
     public ResponseResult getAdvancedQueryFields() {
         List<String> fields = Stream.of("SSN", "邮箱", "手机号", "交易类型").collect(Collectors.toList());
         return ResponseResult.e(ResponseCode.OK, fields);
@@ -198,7 +202,7 @@ public class UserController {
     }
 
     @ApiOperation("高级查找")
-    @PostMapping("advancedQuery")
+    @PostMapping("/advancedQuery")
     public ResponseResult advancedQuery(@RequestBody @Valid AdvancedQueryReq req) {
         String field = req.getField();
         String value = req.getValue();
@@ -251,6 +255,122 @@ public class UserController {
         }
 
         return ResponseResult.e(ResponseCode.OK, advancedQueryVOList);
+    }
+
+    @ApiOperation("获取当月收入总和")
+    @GetMapping("/income-amount")
+    public ResponseResult incomeAmount(Integer userId){
+
+        double amount = 0.0;
+
+        QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+        sendRecordQueryWrapper.lambda().eq(SendRecord::getTargeterId, userId);
+        List<SendRecord> sendRecords = sendRecordService.list(sendRecordQueryWrapper);
+        for (SendRecord tmp : sendRecords){
+            amount += tmp.getValue();
+        }
+
+        QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getRequesterId, userId);
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getStatus, 1);
+        List<RequestRecord> requestRecords = requestRecordService.list(requestRecordQueryWrapper);
+        for (RequestRecord tmp : requestRecords){
+            amount += tmp.getValue();
+        }
+
+        return ResponseResult.e(ResponseCode.OK, amount);
+    }
+
+    @ApiOperation("获取当月支出总和")
+    @GetMapping("/expenses-amount")
+    public ResponseResult expenseAmount(Integer userId){
+
+        double amount = 0.0;
+
+        QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+        sendRecordQueryWrapper.lambda().eq(SendRecord::getSenderId, userId);
+        List<SendRecord> sendRecords = sendRecordService.list(sendRecordQueryWrapper);
+        for (SendRecord tmp : sendRecords){
+            amount += tmp.getValue();
+        }
+
+        QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getTargeterId, userId);
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getStatus, 1);
+        List<RequestRecord> requestRecords = requestRecordService.list(requestRecordQueryWrapper);
+        for (RequestRecord tmp : requestRecords){
+            amount += tmp.getValue();
+        }
+
+        return ResponseResult.e(ResponseCode.OK, amount);
+    }
+
+    @ApiOperation("获取当月最大收入交易")
+    @GetMapping("/income-transaction")
+    public ResponseResult incomeTransaction(Integer userId){
+
+        QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+        sendRecordQueryWrapper.lambda().eq(SendRecord::getTargeterId, userId);
+        List<SendRecord> sendRecords = sendRecordService.list(sendRecordQueryWrapper);
+        SendRecord maxS = new SendRecord();
+        maxS.setValue(-1.0);
+        for (SendRecord tmp : sendRecords){
+            maxS = (tmp.getValue() > maxS.getValue()) ? tmp : maxS;
+        }
+
+        QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getRequesterId, userId);
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getStatus, 1);
+        List<RequestRecord> requestRecords = requestRecordService.list(requestRecordQueryWrapper);
+        RequestRecord maxR = new RequestRecord();
+        maxR.setValue(-1.0);
+        for (RequestRecord tmp : requestRecords){
+            maxR = (tmp.getValue() > maxR.getValue()) ? tmp : maxR;
+        }
+
+        if (maxS.getValue() > maxR.getValue()){
+            AdvancedQueryVO advancedQueryVO = new AdvancedQueryVO(userService, maxS);
+            return ResponseResult.e(ResponseCode.OK, advancedQueryVO);
+        }
+        else {
+            AdvancedQueryVO advancedQueryVO = new AdvancedQueryVO(userService, maxR);
+            return ResponseResult.e(ResponseCode.OK, advancedQueryVO);
+        }
+
+    }
+
+    @ApiOperation("获取当月最大支出交易")
+    @GetMapping("/expenses-transaction")
+    public ResponseResult expensesTransaction(Integer userId){
+
+        QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
+        sendRecordQueryWrapper.lambda().eq(SendRecord::getSenderId, userId);
+        List<SendRecord> sendRecords = sendRecordService.list(sendRecordQueryWrapper);
+        SendRecord maxS = new SendRecord();
+        maxS.setValue(-1.0);
+        for (SendRecord tmp : sendRecords){
+            maxS = (tmp.getValue() > maxS.getValue()) ? tmp : maxS;
+        }
+
+        QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getTargeterId, userId);
+        requestRecordQueryWrapper.lambda().eq(RequestRecord::getStatus, 1);
+        List<RequestRecord> requestRecords = requestRecordService.list(requestRecordQueryWrapper);
+        RequestRecord maxR = new RequestRecord();
+        maxR.setValue(-1.0);
+        for (RequestRecord tmp : requestRecords){
+            maxR = (tmp.getValue() > maxR.getValue()) ? tmp : maxR;
+        }
+
+        if (maxS.getValue() > maxR.getValue()){
+            AdvancedQueryVO advancedQueryVO = new AdvancedQueryVO(userService, maxS);
+            return ResponseResult.e(ResponseCode.OK, advancedQueryVO);
+        }
+        else {
+            AdvancedQueryVO advancedQueryVO = new AdvancedQueryVO(userService, maxR);
+            return ResponseResult.e(ResponseCode.OK, advancedQueryVO);
+        }
+
     }
 
 }
