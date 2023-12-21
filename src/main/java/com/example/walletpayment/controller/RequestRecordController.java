@@ -1,10 +1,12 @@
 package com.example.walletpayment.controller;
 
 import com.example.walletpayment.common.req.AddRequestReq;
+import com.example.walletpayment.common.vo.RequestRecordVO;
 import com.example.walletpayment.config.ResponseCode;
 import com.example.walletpayment.config.ResponseResult;
 import com.example.walletpayment.mybatis.entity.RequestRecord;
 import com.example.walletpayment.service.RequestRecordService;
+import com.example.walletpayment.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Api(tags = "RequestRecord")
@@ -24,6 +27,9 @@ public class RequestRecordController {
 
     @Autowired
     private RequestRecordService requestRecordService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/add")
     @ApiOperation("增加收钱任务")
@@ -43,7 +49,12 @@ public class RequestRecordController {
     @GetMapping("/listIn")
     @ApiOperation("查询收钱任务(付钱的查)")
     public ResponseResult listRequestRecordIn(@RequestParam Integer targeterId){
-        return ResponseResult.e(ResponseCode.OK, requestRecordService.ListRequestRecordIn(targeterId));
+        List<RequestRecord> requestRecordList = requestRecordService.ListRequestRecordIn(targeterId);
+        List<RequestRecordVO> res = new ArrayList<>();
+        for (RequestRecord requestRecord : requestRecordList) {
+            res.add(new RequestRecordVO(userService, requestRecord));
+        }
+        return ResponseResult.e(ResponseCode.OK, res);
     }
 
     @PostMapping("/verify")

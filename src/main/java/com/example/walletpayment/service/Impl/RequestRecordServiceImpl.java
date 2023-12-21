@@ -65,7 +65,6 @@ public class RequestRecordServiceImpl extends ServiceImpl<RequestRecordMapper, R
     @Override
     public List<RequestRecord> ListRequestRecordIn(Integer targeterId) {
         QueryWrapper<RequestRecord> wrapper = new QueryWrapper<>();
-
         wrapper.lambda().eq(RequestRecord::getTargeterId, targeterId);
         List<RequestRecord> requestRecords = this.list(wrapper);
         return requestRecords;
