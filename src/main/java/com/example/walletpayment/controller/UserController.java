@@ -164,7 +164,7 @@ public class UserController {
         if (type.equals("支出")) {
             QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
             sendRecordQueryWrapper.lambda()
-                    .eq(SendRecord::getTargeterId, searcherId);
+                    .eq(SendRecord::getSenderId, searcherId);
             List<SendRecord> sendRecordList = sendRecordService.list(sendRecordQueryWrapper);
             for (SendRecord sendRecord : sendRecordList) {
                 res.add(new AdvancedQueryVO(userService, sendRecord));
@@ -181,7 +181,7 @@ public class UserController {
         else if (type.equals("收入")) {
             QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
             sendRecordQueryWrapper.lambda()
-                    .eq(SendRecord::getSendRecordId, searcherId);
+                    .eq(SendRecord::getTargeterId, searcherId);
             List<SendRecord> sendRecordList = sendRecordService.list(sendRecordQueryWrapper);
             for (SendRecord sendRecord : sendRecordList) {
                 res.add(new AdvancedQueryVO(userService, sendRecord));
@@ -189,7 +189,7 @@ public class UserController {
             QueryWrapper<RequestRecord> requestRecordQueryWrapper = new QueryWrapper<>();
             requestRecordQueryWrapper.lambda()
                     .eq(RequestRecord::getStatus, 1)
-                    .eq(RequestRecord::getRequestRecordId, searcherId);
+                    .eq(RequestRecord::getRequesterId, searcherId);
             List<RequestRecord> requestRecordList = requestRecordService.list(requestRecordQueryWrapper);
             for (RequestRecord requestRecord : requestRecordList) {
                 res.add(new AdvancedQueryVO(userService, requestRecord));
@@ -240,12 +240,7 @@ public class UserController {
             }
 
             case "交易类型": {
-                if (value.equals("支出")) {
-                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), value);
-                }
-                else {
-                    advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), value);
-                }
+                advancedQueryVOList = getAdvancedQueryVOList(req.getUserId(), value);
                 break;
             }
 
