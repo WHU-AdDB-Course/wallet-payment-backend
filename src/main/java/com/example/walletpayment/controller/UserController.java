@@ -259,7 +259,7 @@ public class UserController {
 
     @ApiOperation("获取当月收入总和")
     @GetMapping("/income-amount")
-    public ResponseResult incomeAmount(Integer userId){
+    public ResponseResult incomeAmount(@RequestParam Integer userId){
 
         double amount = 0.0;
 
@@ -283,7 +283,7 @@ public class UserController {
 
     @ApiOperation("获取当月支出总和")
     @GetMapping("/expenses-amount")
-    public ResponseResult expenseAmount(Integer userId){
+    public ResponseResult expenseAmount(@RequestParam Integer userId){
 
         double amount = 0.0;
 
@@ -307,7 +307,7 @@ public class UserController {
 
     @ApiOperation("获取当月最大收入交易")
     @GetMapping("/income-transaction")
-    public ResponseResult incomeTransaction(Integer userId){
+    public ResponseResult incomeTransaction(@RequestParam Integer userId){
 
         QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
         sendRecordQueryWrapper.lambda().eq(SendRecord::getTargeterId, userId);
@@ -341,7 +341,7 @@ public class UserController {
 
     @ApiOperation("获取当月最大支出交易")
     @GetMapping("/expenses-transaction")
-    public ResponseResult expensesTransaction(Integer userId){
+    public ResponseResult expensesTransaction(@RequestParam Integer userId){
 
         QueryWrapper<SendRecord> sendRecordQueryWrapper = new QueryWrapper<>();
         sendRecordQueryWrapper.lambda().eq(SendRecord::getSenderId, userId);
