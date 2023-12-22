@@ -75,7 +75,7 @@ public class CommodityController {
             return ResponseResult.error("商品id不存在");
         }
         BigDecimal sumPrice = BigDecimal.valueOf(commodity.getValue() * purchaseReq.getCommodityNum());
-        if (bankAccountService.checkBalance(purchaseReq.getBankAccountId(), sumPrice.doubleValue())) {
+        if (!bankAccountService.checkBalance(purchaseReq.getBankAccountId(), sumPrice.doubleValue())) {
             return ResponseResult.error("银行账户余额不足");
         }
         deal.setSumPrice(sumPrice.doubleValue());
